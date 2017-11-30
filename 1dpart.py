@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import numpy
 import matplotlib.pyplot as plt
@@ -31,7 +31,7 @@ for i in range(1,N-1):
 
 # construct matrices
 for i in range(1,N-1):
-	A[i,i] = (1 + ae[i] + aw[i])
+	A[i,i] = ap[i]
 	A[i,i-1] = -ae[i]
 	A[i,i+1] = -aw[i]
 
@@ -39,12 +39,12 @@ A[0,0] = 1
 A[N-1,N-1] = 1
 
 # construct production matrices
-c_prev = numpy.zeros([N,]) * c_0
+c_prev = numpy.ones([N,]) * c_0
 c_prev[N-1] = c_s
 
 # populate solution vectors
-for i in range(0,1000):
-	c_prod = k * c_prev * delta_t
+for i in range(0,500):
+	c_prod = -k * c_prev * delta_t
 	c_prod[N-1] = 0
 	c_new = numpy.linalg.solve(A,c_prev + c_prod)
 	c_prev = c_new
@@ -52,11 +52,13 @@ for i in range(0,1000):
 # construct analytical solution
 c_a = numpy.zeros([N,])
 for i in range(1,N-1):
-	c_a[i] = c_s * (r[i] / r_part) * math.sinh(r[i]*math.sqrt(k/D)) / math.sinh(r_part * math.sqrt(k/D))
+	c_a[i] = c_s * (r_part / r[i]) * math.sinh(r[i]*math.sqrt(k/D)) / math.sinh(r_part * math.sqrt(k/D))
 c_a[N-1] = c_s
+c_a[0] = math.sqrt(k/D) / math.sinh(r_part * math.sqrt(k/D)) * r_part # here we have to use a limit
 
 # plot results
-plt.plot(r,c_new)
-plt.plot(r,c_a)
+plt.plot(r,c_new,label='Numerical')
+plt.plot(r,c_a,label='Analytical')
 plt.axis((0,1,0,1))
+plt.legend(loc=4)
 plt.show()
