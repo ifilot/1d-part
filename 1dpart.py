@@ -7,7 +7,7 @@ import math
 # define variables
 r_part = 1
 delta_t = 0.01
-delta_r = 0.01
+delta_r = 0.1
 D = 1
 c_0 = 0
 c_s = 1
@@ -25,17 +25,19 @@ ap = numpy.zeros([N,])
 alpha = numpy.zeros([N,])
 A = numpy.zeros([N,N])
 for i in range(1,N-1):
-	ae[i] = beta * r[i+1]**2 / r[i]**2
-	aw[i] = beta * r[i-1]**2 / r[i]**2
-	ap[i] = 1 + ae[i] + aw[i]
+	aw[i] = beta * r[i-1]**2 / r[i]**2	# west side
+	ae[i] = beta * r[i+1]**2 / r[i]**2	# east side
+	ap[i] = 1 + aw[i] + ae[i]		# center
 
 # construct matrices
 for i in range(1,N-1):
 	A[i,i] = ap[i]
-	A[i,i-1] = -ae[i]
-	A[i,i+1] = -aw[i]
+	A[i,i-1] = -aw[i]
+	A[i,i+1] = -ae[i]
 
-A[0,0] = 1
+# these follow from the boundary conditions
+A[0,0] = 1 + 6 * beta
+A[0,1] = -6 * beta
 A[N-1,N-1] = 1
 
 # construct production matrices
@@ -43,10 +45,13 @@ c_prev = numpy.ones([N,]) * c_0
 c_prev[N-1] = c_s
 
 # populate solution vectors
-for i in range(0,500):
+for i in range(0,1000):
 	c_prod = -k * c_prev * delta_t
 	c_prod[N-1] = 0
 	c_new = numpy.linalg.solve(A,c_prev + c_prod)
+	if numpy.linalg.norm(c_prev - c_new,2) < 1e-4:
+		print "Convergence reached after %i steps" % i
+		break
 	c_prev = c_new
 
 # construct analytical solution
