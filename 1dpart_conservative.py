@@ -20,11 +20,11 @@ import math
 # define variables
 r_part = 1		# particle radius
 delta_t = 0.01	# time step
-delta_r = 0.01	# length increment
+delta_r = 0.05	# length increment
 D = 1			# diffusion constant
 c_0 = 0			# starting concentration
 c_s = 1			# surface concentration
-k = 50.0		# reaction rate constant
+k = 1.0		# reaction rate constant
 
 # compute auxiliary variables
 N = int(r_part / delta_r) + 1

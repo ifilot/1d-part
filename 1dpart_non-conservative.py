@@ -20,7 +20,7 @@ import math
 # define variables
 r_part = 1			# particle radius
 delta_t = 0.01		# time step
-delta_r = 0.002		# length increment
+delta_r = 0.05		# length increment
 D = 1				# diffusion constant
 c_0 = 0				# starting concentration
 c_s = 1				# surface concentration
@@ -31,7 +31,7 @@ N = int(r_part / delta_r) + 1
 beta = D * delta_t / delta_r**2
 
 # construct arrays
-r = numpy.linspace(delta_r / 2, r_part - delta_r / 2, num=N)
+r = numpy.linspace(0, r_part, num=N)
 
 # construct matrices
 A = numpy.zeros([N,N])
@@ -43,8 +43,7 @@ for i in range(1,N-1):
 # these follow from the boundary conditions
 A[0,0] = 1 + 2 * beta
 A[0,1] = - 2 * beta
-A[N-1,N-1] = 1 + 2 * beta
-A[N-1,N-2] = - beta * (1 - delta_r / r[i])
+A[N-1,N-1] = 1
 
 # construct production matrices
 c_prev = numpy.ones([N,]) * c_0
@@ -52,8 +51,9 @@ c_prev = numpy.ones([N,]) * c_0
 # populate solution vectors
 for i in range(0,1000):
 	c_prod = -k * c_prev * delta_t
-	c_prod[N-1] += beta * (1 + (delta_r/2.0) / r_part)
+	c_prod[N-1] = 0	# no reaction at the boundary
 	c_new = numpy.linalg.solve(A,c_prev + c_prod)
+	c_new[N-1] = 1	# fix boundary concentration
 	if numpy.linalg.norm(c_prev - c_new,2) < 1e-4:
 		print "Convergence reached after %i steps" % i
 		break
